@@ -1,0 +1,6 @@
+{
+    "model_path": "model",
+    "tokenizer_path": "tokenizer",
+    "max_length": 128,
+    "evaluation_metrics": ["accuracy", "precision", "recall"]
+}
