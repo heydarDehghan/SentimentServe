@@ -1,37 +1,44 @@
 # app.py
 from flask import Flask, request, jsonify
 import torch
-from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import BertTokenizer, BertForSequenceClassification, AutoTokenizer, pipeline, \
+    AutoModelForSequenceClassification
 import pandas as pd
 import json
 
 app = Flask(__name__)
 
 # Load configuration
-with open('config.json') as config_file:
+with open('static/config.json') as config_file:
     config = json.load(config_file)
 
 # Load model and tokenizer
-model = BertForSequenceClassification.from_pretrained(config['model_path'])
-tokenizer = BertTokenizer.from_pretrained(config['tokenizer_path'])
+model = AutoModelForSequenceClassification.from_pretrained(config['model_path'])
+tokenizer = AutoTokenizer.from_pretrained(config['tokenizer_path'])
 
 
 def analyze_sentiment(sentence):
-    inputs = tokenizer(sentence, return_tensors='pt', max_length=config['max_length'], truncation=True,
-                       padding='max_length')
-    outputs = model(**inputs)
-    probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
-    sentiment_score = torch.max(probs, dim=1).values.item()
-    sentiment_label = torch.argmax(probs, dim=1).item()
-    return sentiment_score, sentiment_label
+    # inputs = tokenizer(sentence, return_tensors='pt', max_length=config['max_length'], truncation=True,
+    #                    padding='max_length')
+    # outputs = model(**inputs)
+    # probs = torch.nn.functional.softmax(outputs.logits, dim=-1)
+    # sentiment_score = torch.max(probs, dim=1).values.item()
+    # sentiment_label = torch.argmax(probs, dim=1).item()
+
+    # Create a new sentiment analysis pipeline
+    sentiment_pipeline = pipeline('sentiment-analysis', model=model, tokenizer=tokenizer)
+    result = sentiment_pipeline(sentence)
+
+    return result
+    # return sentiment_score, sentiment_label
 
 
 @app.route('/sentiment', methods=['POST'])
 def get_sentiment():
     data = request.json
     sentence = data['sentence']
-    sentiment_score, sentiment_label = analyze_sentiment(sentence)
-    return jsonify({'sentence': sentence, 'sentiment_score': sentiment_score, 'sentiment_label': sentiment_label})
+    sentiment_score = analyze_sentiment(sentence)
+    return sentiment_score
 
 
 @app.route('/batch_sentiment', methods=['POST'])

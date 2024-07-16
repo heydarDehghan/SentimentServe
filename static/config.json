@@ -1,6 +1,7 @@
 {
-    "model_path": "model",
-    "tokenizer_path": "tokenizer",
+    "model_path": "basics/model/saved_model",
+    "tokenizer_path": "basics/tokenizer/saved_model",
     "max_length": 128,
-    "evaluation_metrics": ["accuracy", "precision", "recall"]
+    "evaluation_metrics": ["accuracy", "precision", "recall"],
+    "dataset_path": "data/sentiment_dataset.csv"
 }
